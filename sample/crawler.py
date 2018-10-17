@@ -1,5 +1,7 @@
 from selenium import webdriver
 
+IMPLICIT_WAIT_TIME=6 # default time to wait to locate DOM elements, in seconds
+
 def connect(host, username, password):
     options = webdriver.ChromeOptions()
     options.add_argument('headless')
@@ -12,7 +14,7 @@ def connect(host, username, password):
     driver.get('http://' + host)
 
     # wait up to 10 seconds for the elements to become available
-    driver.implicitly_wait(10)
+    driver.implicitly_wait(IMPLICIT_WAIT_TIME)
 
     driver.switch_to.frame(driver.find_element_by_css_selector('#MAINFRAME'));
 
@@ -27,6 +29,12 @@ def connect(host, username, password):
     input_login.click()
 
     # TODO add "wrong password/username" handling
+    # wait until LN_REMOTE_CONTROL appears
+    # if not, if #msglbl contains 'Invalid Authentication'
+    # ------- returns error
+
+
+
 
     # connected, going to remote control
     driver.find_element_by_css_selector(

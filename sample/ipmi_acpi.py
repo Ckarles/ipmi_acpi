@@ -1,6 +1,8 @@
 import click
 import sample.crawler as crawler
 
+# TODO add a -k --keyfile containing username: xxx and password: xxxpip
+
 @click.group(invoke_without_command=True)
 @click.pass_context
 @click.option('-u', '--username', prompt=True)
