@@ -36,3 +36,5 @@ def cli(username, password, host, command):
 
     except ValueError as e:
         click.echo('Error: {}'.format(e))
+    except RuntimeError as e:
+        click.echo('Error: {}'.format(e))

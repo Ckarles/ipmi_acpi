@@ -1,4 +1,5 @@
 from selenium import webdriver
+from selenium.common import exceptions as selenium_exceptions
 
 IMPLICIT_WAIT_TIME=7 # default time to wait to locate DOM elements, in seconds
 
@@ -36,6 +37,9 @@ class Caravel(object):
         driver = self.driver
 
         # TODO check if host is accessible
+        # note:
+        # cannot get status code of request
+        # try: ...ing to switch to frame as a workaround
 
         # doesn't work with self-generated CA's SSL certificate
         # TODO find why https doesn't frikking work!
@@ -44,7 +48,10 @@ class Caravel(object):
         # wait up to 10 seconds for the elements to become available
         driver.implicitly_wait(IMPLICIT_WAIT_TIME)
 
-        switch_to_frame(driver, 'mainframe')
+        try:
+            switch_to_frame(driver, 'mainframe')
+        except selenium_exceptions.NoSuchElementException as e:
+            raise RuntimeError('Cannot connect, unknown error.')
 
         # use css selectors to grab the login inputs
         input_username = driver.find_element_by_css_selector('input#login_username')
