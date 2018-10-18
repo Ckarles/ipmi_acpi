@@ -4,28 +4,35 @@ import sample.webdriver as webdriver
 # TODO add a -k --keyfile containing username: xxx and password: xxxpip
 # @click.option('-k', '--keyfile', callback=set_default, is_eager=True)
 
-@click.group(invoke_without_command=True)
-@click.pass_context
+@click.command()
 @click.option('-u', '--username', prompt=True)
 @click.option('-p', '--password', prompt=True, hide_input=True)
-@click.argument('host', envvar='ipmi_host')
-def cli(ctx, username, password, host):
+@click.option('-c', '--command',
+    type = click.Choice(['status', 'start', 'stop', 'force-stop', 'reset']),
+    help = 'command to send to ipmi interface',
+    show_default = True,
+    required = True,
+    default = 'status'
+    )
+@click.argument('host', envvar = 'ipmi_host')
+def cli(username, password, host, command):
     """sends acpi commands to an ipmi host"""
 
-    click.echo('connecting to {}'.format(host))
+    click.echo('Command: {}'.format(command))
+    click.echo('Connecting to: {}...'.format(host))
 
-    with webdriver.Caravel(host, username, password) as caravel:
-        controls = webdriver.RemoteControl(caravel)
-        controls.stop()
+    try:
+        with webdriver.Caravel(host, username, password) as caravel:
+            # access remote controls
+            click.echo('Connected!')
+            controls = webdriver.RemoteControl(caravel)
+            command_launch = getattr(controls, command)
+            click.echo('Ipmi status: {}'.format(controls.status()))
 
-    ### to put in the right place (to only display ipmi host status) ###
-    # if ctx.invoked_subcommand is None:
-    #     click.echo('I was invoked without subcommand')
-    # else:
-    #     click.echo('I am about to invoke %s' % ctx.invoked_subcommand)
-    ####################################################################
+            try:
+                command_launch()
+            except ValueError as e:
+                click.echo('Error: {}'.format(e))
 
-@cli.command()
-def start():
-    """start ipmi host"""
-    click.echo('hello ')
+    except ValueError as e:
+        click.echo('Error: {}'.format(e))

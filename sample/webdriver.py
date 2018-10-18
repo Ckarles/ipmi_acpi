@@ -1,6 +1,6 @@
 from selenium import webdriver
 
-IMPLICIT_WAIT_TIME=4 # default time to wait to locate DOM elements, in seconds
+IMPLICIT_WAIT_TIME=7 # default time to wait to locate DOM elements, in seconds
 
 def switch_to_frame(driver, frame_name):
     driver.switch_to.default_content()
@@ -20,7 +20,7 @@ class Caravel(object):
         self.password = password
 
         options = webdriver.ChromeOptions()
-        # options.add_argument('headless')
+        options.add_argument('headless')
         # init driver
         self.driver = webdriver.Chrome(chrome_options=options)
 
@@ -34,6 +34,9 @@ class Caravel(object):
     def connect(self):
         """browse the webpage and try to login"""
         driver = self.driver
+
+        # TODO check if host is accessible
+
         # doesn't work with self-generated CA's SSL certificate
         # TODO find why https doesn't frikking work!
         driver.get(self.url)
@@ -130,36 +133,25 @@ def add_remote_cmd(cmd, selector):
     def fn(self):
         switch_to_frame(self.caravel.driver, 'pageframe')
 
-        status = self.status()
         el = self.caravel.driver.find_element_by_css_selector(selector)
 
         if not el.is_enabled():
-            raise ValueError('Cannot {0}, status: {1}'.format(cmd, status))
+            status = self.status()
+            raise ValueError('Cannot {0}, status: "{1}"'.format(cmd, status))
         else:
             el.click()
             self.caravel.driver.find_element_by_css_selector('input#_prfmAction').click()
 
     setattr(RemoteControl, cmd, fn)
 
-add_remote_cmd('start', 'input#_pwrOnSrvr')
-add_remote_cmd('stop', 'input#_oPwrOffSrvr')
+command_selector = {
+    'reset':        'input#_resetSrvr',
+    'force-stop':   'input#_iPwrOffSrvr',
+    'stop':         'input#_oPwrOffSrvr',
+    'start':        'input#_pwrOnSrvr',
+    # wtf is powercycle ?
+    # 'cycle':        'input#_pwrCycleSrvr'
+}
 
-    # @remote_cmd
-    # def reset(self):
-    #     self.caravel.driver.find_element_by_css_selector('input#_resetSrvr').click
-    #
-    # @remote_cmd
-    # def poweroff(self):
-    #     self.caravel.driver.find_element_by_css_selector('input#_iPwrOffSrvr').click
-    #
-    # @remote_cmd
-    # def shutdown(self):
-    #     self.caravel.driver.find_element_by_css_selector('input#_oPwrOffSrvr').click
-    #
-    # @remote_cmd
-    # def poweron(self):
-    #     self.caravel.driver.find_element_by_css_selector('input#_pwrOnSrvr').click
-    #
-    # @remote_cmd
-    # def powercycle(self):
-    #     self.caravel.driver.find_element_by_css_selector('input#_pwrCycleSrvr').click
+for command, selector in command_selector.items():
+    add_remote_cmd(command, selector)
