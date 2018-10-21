@@ -148,7 +148,12 @@ def add_remote_cmd(cmd, selector):
             print_cb('Ipmi status: {}'.format(self.status()))
             el.click()
             driver.find_element_by_css_selector('input#_prfmAction').click()
-            watch_remote_cmd_state(driver, print_cb)
+
+            try:
+                watch_remote_cmd_state(driver, print_cb)
+            except selenium_exceptions.TimeoutException as e:
+                return print_cb('Error: command taking more than {}s to execute. Cannot confirm state.'.format(WAIT_TIME_REMOTE_CMD))
+
             print_cb('Ipmi status: {}'.format(self.status()))
 
     setattr(RemoteControl, cmd, fn)
