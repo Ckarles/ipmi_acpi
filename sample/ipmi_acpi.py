@@ -16,7 +16,7 @@ import sample.webdriver as webdriver
     )
 @click.argument('host', envvar = 'ipmi_host')
 def cli(username, password, host, command):
-    """sends acpi commands to an ipmi host"""
+    """sends acpi commands to an asrock ipmi host"""
 
     click.echo('Command: {}'.format(command))
     click.echo('Connecting to: {}...'.format(host))
