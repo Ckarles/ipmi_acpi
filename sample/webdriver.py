@@ -1,7 +1,10 @@
 from selenium import webdriver
 from selenium.common import exceptions as selenium_exceptions
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
 
-IMPLICIT_WAIT_TIME=7 # default wait time to locate DOM elements, in seconds
+WAIT_TIME_IMPLICIT=7 # default wait time to locate DOM elements, in seconds
+WAIT_TIME_REMOTE_CMD=60 # timeout for a remote cmd
 
 def switch_to_frame(driver, frame_name):
     driver.switch_to.default_content()
@@ -46,7 +49,7 @@ class Caravel(object):
         # try: ...ing to switch to frame as a workaround
 
         # wait up to X seconds for the elements to become available
-        driver.implicitly_wait(IMPLICIT_WAIT_TIME)
+        driver.implicitly_wait(WAIT_TIME_IMPLICIT)
 
         try:
             switch_to_frame(driver, 'mainframe')
@@ -114,14 +117,6 @@ class Caravel(object):
         except:
             return False
 
-    ### TODO
-    ### action execution depending on the order, eg
-    ### poweron.click() (possible only if status_str == "Host is down", check if radio element.is_enabled() (or is_selected ?))
-    ### action_button.click()
-    ### then wait using selenium.webdriver.support.wait.WebDriverWait
-    ### while displaying:
-    ### driver.switch_to.frame(driver.find_element_by_css_selector('#MAINFRAME'));
-    ### driver.find_element_by_css_selector('span#_loaderStatus').text
 
 class RemoteControl(object):
     def __init__(self, caravel):
@@ -131,13 +126,16 @@ class RemoteControl(object):
         if not caravel.is_on_remote_control():
             caravel.go_to_remote_control()
 
-    def status(self):
+    def status(self, print_cb=None):
         switch_to_frame(self.caravel.driver, 'pageframe')
-        return self.caravel.driver.find_element_by_css_selector('#_statusMsg').text
+        status = self.caravel.driver.find_element_by_css_selector('#_statusMsg').text
+        if print_cb:
+            print_cb(status)
+        return status
 
 
 def add_remote_cmd(cmd, selector):
-    def fn(self):
+    def fn(self, print_cb=print):
         driver = self.caravel.driver
         switch_to_frame(driver, 'pageframe')
 
@@ -147,8 +145,11 @@ def add_remote_cmd(cmd, selector):
             status = self.status()
             raise ValueError('Cannot {0}, status: "{1}"'.format(cmd, status))
         else:
+            print_cb('Ipmi status: {}'.format(self.status()))
             el.click()
             driver.find_element_by_css_selector('input#_prfmAction').click()
+            watch_remote_cmd_state(driver, print_cb)
+            print_cb('Ipmi status: {}'.format(self.status()))
 
     setattr(RemoteControl, cmd, fn)
 
@@ -163,3 +164,29 @@ command_selector = {
 
 for command, selector in command_selector.items():
     add_remote_cmd(command, selector)
+
+class text_reach(object):
+    def __init__(self, locator, text_to_reach, callback):
+        self.locator = locator
+        self.text_to_reach = text_to_reach
+        self.callback = callback
+        self.text = ''
+
+    def __call__(self, driver):
+        actual_text = driver.find_element(*self.locator).text
+
+        if actual_text != self.text:
+            if actual_text:
+                self.callback(actual_text)
+            self.text = actual_text
+            return self.text == self.text_to_reach
+        else:
+            return False
+
+def watch_remote_cmd_state(driver, callback):
+    switch_to_frame(driver, 'mainframe')
+    WebDriverWait(driver, WAIT_TIME_REMOTE_CMD).until(text_reach(
+        (By.CSS_SELECTOR, 'span#_loaderStatus'),
+        '',
+        callback
+    ))

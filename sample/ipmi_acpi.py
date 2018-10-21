@@ -27,10 +27,9 @@ def cli(username, password, host, command):
             click.echo('Connected!')
             controls = webdriver.RemoteControl(caravel)
             command_launch = getattr(controls, command)
-            click.echo('Ipmi status: {}'.format(controls.status()))
 
             try:
-                command_launch()
+                command_launch(print_cb=click.echo)
             except ValueError as e:
                 click.echo('Error: {}'.format(e))
 
