@@ -1,7 +1,7 @@
 from selenium import webdriver
 from selenium.common import exceptions as selenium_exceptions
 
-IMPLICIT_WAIT_TIME=7 # default time to wait to locate DOM elements, in seconds
+IMPLICIT_WAIT_TIME=7 # default wait time to locate DOM elements, in seconds
 
 def switch_to_frame(driver, frame_name):
     driver.switch_to.default_content()
@@ -36,16 +36,16 @@ class Caravel(object):
         """browse the webpage and try to login"""
         driver = self.driver
 
+        # doesn't work with self-generated CA's SSL certificate
+        # TODO find why https doesn't frikking work!
+        driver.get(self.url)
+
         # TODO check if host is accessible
         # note:
         # cannot get status code of request
         # try: ...ing to switch to frame as a workaround
 
-        # doesn't work with self-generated CA's SSL certificate
-        # TODO find why https doesn't frikking work!
-        driver.get(self.url)
-
-        # wait up to 10 seconds for the elements to become available
+        # wait up to X seconds for the elements to become available
         driver.implicitly_wait(IMPLICIT_WAIT_TIME)
 
         try:
@@ -138,16 +138,17 @@ class RemoteControl(object):
 
 def add_remote_cmd(cmd, selector):
     def fn(self):
-        switch_to_frame(self.caravel.driver, 'pageframe')
+        driver = self.caravel.driver
+        switch_to_frame(driver, 'pageframe')
 
-        el = self.caravel.driver.find_element_by_css_selector(selector)
+        el = driver.find_element_by_css_selector(selector)
 
         if not el.is_enabled():
             status = self.status()
             raise ValueError('Cannot {0}, status: "{1}"'.format(cmd, status))
         else:
             el.click()
-            self.caravel.driver.find_element_by_css_selector('input#_prfmAction').click()
+            driver.find_element_by_css_selector('input#_prfmAction').click()
 
     setattr(RemoteControl, cmd, fn)
 
