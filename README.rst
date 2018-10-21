@@ -1,7 +1,6 @@
 IPMI_ACPI
 =========
 Automation tool to send acpi commands to asrock-rack's ipmi web interface.
---------------------------------------------------------------------------
 
 Usage
 -----
@@ -24,7 +23,7 @@ example:
 
   $ ipmi_acpi -u admin websrv02_ipmi.local -c start
   Password:
-  Command: stop
+  Command: start
   Connecting to: websrv02_ipmi.local...
   Connected!
   Ipmi status: Host is currently off
