@@ -6,8 +6,9 @@ name = "pypi"
 [packages]
 selenium = "*"
 click = "*"
+ipmi-acpi = {editable = true,path = "."}
 
 [dev-packages]
 
 [requires]
-python_version = "3.6"
+python_version = "3.7"
