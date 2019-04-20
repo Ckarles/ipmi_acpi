@@ -2,9 +2,11 @@ from selenium import webdriver
 from selenium.common import exceptions as selenium_exceptions
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 
-WAIT_TIME_IMPLICIT=7 # default wait time to locate DOM elements, in seconds
+WAIT_TIME_IMPLICIT=15 # default wait time to locate DOM elements, in seconds
 WAIT_TIME_REMOTE_CMD=60 # timeout for a remote cmd
+BROWSER='firefox'
 
 def switch_to_frame(driver, frame_name):
     driver.switch_to.default_content()
@@ -23,10 +25,20 @@ class Caravel(object):
         self.username = username
         self.password = password
 
-        options = webdriver.ChromeOptions()
-        options.add_argument('headless')
-        # init driver
-        self.driver = webdriver.Chrome(chrome_options=options)
+        if BROWSER == 'chrome':
+
+            options = webdriver.ChromeOptions()
+            options.add_argument('headless')
+            # init driver
+            self.driver = webdriver.Chrome(chrome_options=options)
+
+        elif BROWSER == 'firefox':
+
+            options = webdriver.firefox.options.Options()
+            options.add_argument('-headless')
+            # init driver
+            self.driver = webdriver.Firefox(options=options)
+
 
     def __enter__(self):
         self.connect()
@@ -128,7 +140,12 @@ class RemoteControl(object):
 
     def status(self, print_cb=None):
         switch_to_frame(self.caravel.driver, 'pageframe')
-        status = self.caravel.driver.find_element_by_css_selector('#_statusMsg').text
+        status_el = self.caravel.driver.find_element_by_css_selector('#_statusMsg')
+
+        WebDriverWait(self.caravel.driver, WAIT_TIME_IMPLICIT).until(
+          EC.text_to_be_present_in_element((By.ID, '_statusMsg'), 'is')
+        )
+        status = status_el.text
         if print_cb:
             print_cb(status)
         return status
