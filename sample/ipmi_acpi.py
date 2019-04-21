@@ -1,5 +1,6 @@
 import click
 import sample.webdriver as webdriver
+import re
 
 # TODO add a -k --keyfile containing username: xxx and password: xxxpip
 # @click.option('-k', '--keyfile', callback=set_default, is_eager=True)
@@ -25,6 +26,10 @@ def cli(username, password, host, command, browser):
     """sends acpi commands to an asrock ipmi host"""
 
     click.echo('Command: {}'.format(command))
+
+
+    if not re.match('https?://', host):
+        host = 'https://{}'.format(host)
     click.echo('Connecting to: {}...'.format(host))
 
     try:

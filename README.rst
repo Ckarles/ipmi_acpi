@@ -42,12 +42,3 @@ Dependencies
 
 .. _geckodriver: https://github.com/mozilla/geckodriver/releases
 .. _chromedriver: https://github.com/SeleniumHQ/selenium/wiki/ChromeDriver
-
-
-Important note
---------------
-
-It is unknown why, but this doesn't work with self-generated CA's SSL certificate,
-so the username / password are sent in plain text using unencrypted http!
-
-Please to keep that in mind and only use this script in a trusted network or through an encrypted tunnel.

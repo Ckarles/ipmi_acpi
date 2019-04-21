@@ -20,7 +20,7 @@ def switch_to_frame(driver, frame_name):
 
 class Caravel(object):
     def __init__(self, host, username, password, browser):
-        self.url = 'http://' + host
+        self.url = host
         self.username = username
         self.password = password
 
@@ -28,8 +28,12 @@ class Caravel(object):
 
             options = webdriver.ChromeOptions()
             options.add_argument('headless')
+
+            capabilities = webdriver.common.desired_capabilities.DesiredCapabilities.CHROME.copy()
+            capabilities['acceptInsecureCerts'] = True
+
             # init driver
-            self.driver = webdriver.Chrome(chrome_options=options)
+            self.driver = webdriver.Chrome(chrome_options=options, desired_capabilities=capabilities)
 
         elif browser == 'firefox':
 
