@@ -6,7 +6,6 @@ from selenium.webdriver.support import expected_conditions as EC
 
 WAIT_TIME_IMPLICIT=15 # default wait time to locate DOM elements, in seconds
 WAIT_TIME_REMOTE_CMD=60 # timeout for a remote cmd
-BROWSER='firefox'
 
 def switch_to_frame(driver, frame_name):
     driver.switch_to.default_content()
@@ -20,19 +19,19 @@ def switch_to_frame(driver, frame_name):
 
 
 class Caravel(object):
-    def __init__(self, host, username, password):
+    def __init__(self, host, username, password, browser):
         self.url = 'http://' + host
         self.username = username
         self.password = password
 
-        if BROWSER == 'chrome':
+        if browser == 'chrome':
 
             options = webdriver.ChromeOptions()
             options.add_argument('headless')
             # init driver
             self.driver = webdriver.Chrome(chrome_options=options)
 
-        elif BROWSER == 'firefox':
+        elif browser == 'firefox':
 
             options = webdriver.firefox.options.Options()
             options.add_argument('-headless')

@@ -5,6 +5,12 @@ import sample.webdriver as webdriver
 # @click.option('-k', '--keyfile', callback=set_default, is_eager=True)
 
 @click.command()
+@click.option('-b', '--browser',
+    type = click.Choice(['firefox', 'chrome']),
+    show_default = True,
+    required = True,
+    default = 'firefox'
+)
 @click.option('-u', '--username', prompt=True)
 @click.option('-p', '--password', prompt=True, hide_input=True)
 @click.option('-c', '--command',
@@ -15,14 +21,14 @@ import sample.webdriver as webdriver
     default = 'status'
     )
 @click.argument('host', envvar = 'ipmi_host')
-def cli(username, password, host, command):
+def cli(username, password, host, command, browser):
     """sends acpi commands to an asrock ipmi host"""
 
     click.echo('Command: {}'.format(command))
     click.echo('Connecting to: {}...'.format(host))
 
     try:
-        with webdriver.Caravel(host, username, password) as caravel:
+        with webdriver.Caravel(host, username, password, browser) as caravel:
             # access remote controls
             click.echo('Connected!')
             controls = webdriver.RemoteControl(caravel)
