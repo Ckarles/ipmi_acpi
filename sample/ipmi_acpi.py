@@ -19,7 +19,7 @@ import sample.webdriver as webdriver
     show_default = True,
     required = True,
     default = 'status'
-    )
+)
 @click.argument('host', envvar = 'ipmi_host')
 def cli(username, password, host, command, browser):
     """sends acpi commands to an asrock ipmi host"""
