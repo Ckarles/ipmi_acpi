@@ -30,7 +30,7 @@ def cli(username, password, host, command, browser):
 
     if not re.match('https?://', host):
         host = 'https://{}'.format(host)
-    click.echo('Connecting to: {}...'.format(host))
+    click.echo('Connecting to: {}'.format(host))
 
     try:
         with webdriver.Caravel(host, username, password, browser) as caravel:
