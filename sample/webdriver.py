@@ -161,11 +161,12 @@ def add_remote_cmd(cmd, selector):
 
         el = driver.find_element_by_css_selector(selector)
 
+        status = self.status()
+
         if not el.is_enabled():
-            status = self.status()
             raise ValueError('Cannot {0}, status: "{1}"'.format(cmd, status))
         else:
-            print_cb('Ipmi status: {}'.format(self.status()))
+            print_cb('Ipmi status: {}'.format(status))
             el.click()
             driver.find_element_by_css_selector('input#_prfmAction').click()
 
