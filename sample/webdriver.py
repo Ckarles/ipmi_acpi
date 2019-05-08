@@ -54,8 +54,6 @@ class Caravel(object):
         """browse the webpage and try to login"""
         driver = self.driver
 
-        # doesn't work with self-generated CA's SSL certificate
-        # TODO find why https doesn't frikking work!
         driver.get(self.url)
 
         # TODO check if host is accessible
